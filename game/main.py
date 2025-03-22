@@ -4,9 +4,7 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-# it will display on screen 
 screen = pygame.display.set_mode([600, 500])
-
 
 class Button:
     def __init__(self,x,y,width,height,colour,text,font):
@@ -80,6 +78,15 @@ class CharSelect:
         else:
             return select
 
+class Player:
+    def __init__(self,name,weakness,strength,rap,defence):
+        self.health = 100
+        self.name = name
+        self.weakness = weakness
+        self.strength = strength
+        self.rapTxt = rap
+        self.defence = defense
+
 
 
 base_font = pygame.font.Font(None, 32)
@@ -116,8 +123,11 @@ while gameRun:
                 selected = char1.clicked(event,selected)
                 selected = char2.clicked(event,selected)
                 selected = char3.clicked(event,selected)
-            createGame.clicked(event)
-            joinGame.clicked(event)
+                
+            if createGame.clicked(event):
+                state = False #create a game
+            if joinGame.clicked(event):
+                state = False #join a game
 
             if (event.type == pygame.KEYDOWN) and active:
                 
@@ -140,7 +150,6 @@ while gameRun:
                 gameIDInput.setColour(colour_passive)
 
         gameIDInput.draw(screen,(0,0))
-
         createGame.draw(screen,(-100,0))
         joinGame.draw(screen,(100,0))
 
