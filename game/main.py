@@ -7,32 +7,12 @@ clock = pygame.time.Clock()
 # it will display on screen 
 screen = pygame.display.set_mode([600, 500])
 
-class TextBox:
+
+class Button:
     def __init__(self,x,y,width,height,colour,text,font):
         self.rect = pygame.Rect(x,y,width,height)
         self.colour = colour
         self.text = text
-        self.font = font
-
-    def setColour(self,colour):
-        self.colour = colour
-
-    def clicked(self):
-        pass
-
-    def draw(self,surface):
-        self.rect.center = (surface.get_width()//2,surface.get_height()//2)
-        pygame.draw.rect(surface,self.colour,self.rect) 
-        textSurface = self.font.render(self.text, True, (0,0,0)) 
-        surface.blit(textSurface, (self.rect.x+5,self.rect.y+5)) 
-        self.rect.w = max(100, textSurface.get_width()+10)
-        
-
-class Button:
-    def __init__(self,x,y,width,height,colour,label,font):
-        self.rect = pygame.Rect(x,y,width,height)
-        self.colour = colour
-        self.label = label
         self.font = font
         self.border = 1
         self.lastClicked = -5000
@@ -43,7 +23,7 @@ class Button:
     def draw(self,surface,offset):
         self.rect.center = (surface.get_width()//2 + offset[1],surface.get_height()//2 + offset[0])
         pygame.draw.rect(surface,self.colour,self.rect)
-        textSurface = self.font.render(self.label, True, (0,0,0)) 
+        textSurface = self.font.render(self.text, True, (0,0,0)) 
         surface.blit(textSurface, (self.rect.x+5,self.rect.y+5))
         self.rect.w = max(100, textSurface.get_width()+10)
         pygame.draw.rect(surface,(255,255,255),self.rect,self.border)
@@ -52,7 +32,7 @@ class Button:
     def clicked(self,event):
         self.hover()
         returner = False
-        if event.type == pygame.MOUSEBUTTONDOWN and pygame.time.get_ticks() - self.lastClicked > 500:
+        if event.type == pygame.MOUSEBUTTONDOWN and pygame.time.get_ticks() - self.lastClicked > 100:
             if self.rect.collidepoint(event.pos):
                 self.border = 1
                 self.lastClicked = pygame.time.get_ticks()
@@ -107,7 +87,7 @@ base_font = pygame.font.Font(None, 32)
 colour_active = pygame.Color('lightskyblue3')
 colour_passive = pygame.Color('chartreuse4')
 
-gameIDInput = TextBox(200,200,140,32,colour_passive,'',base_font)
+gameIDInput = Button(200,200,140,32,colour_passive,'',base_font)
 createGame = Button(200,100,140,32,colour_passive,'Create new game!',base_font)
 joinGame = Button(200,300,140,32,colour_passive,'Join game with code!',base_font)
 char1 = CharSelect(200,440,50,50,'barry.png','Flash')
@@ -136,8 +116,8 @@ while gameRun:
                 selected = char1.clicked(event,selected)
                 selected = char2.clicked(event,selected)
                 selected = char3.clicked(event,selected)
-                createGame.clicked(event)
-                joinGame.clicked(event)
+            createGame.clicked(event)
+            joinGame.clicked(event)
 
             if (event.type == pygame.KEYDOWN) and active:
                 
@@ -159,7 +139,7 @@ while gameRun:
         else: 
                 gameIDInput.setColour(colour_passive)
 
-        gameIDInput.draw(screen)
+        gameIDInput.draw(screen,(0,0))
 
         createGame.draw(screen,(-100,0))
         joinGame.draw(screen,(100,0))
