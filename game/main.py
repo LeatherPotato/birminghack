@@ -2,7 +2,7 @@ import pygame
 
 pygame.init() 
 
-clock = pygame.time.Clock() 
+clock = pygame.time.Clock()
 
 # it will display on screen 
 screen = pygame.display.set_mode([600, 500])
@@ -37,17 +37,20 @@ class Image:
         self.image = image
 
 class CharSelect:
-    def __init__(self,x,y,width,height,image):
+    def __init__(self,x,y,width,height,image,name):
         self.pos = (x,y)
         self.image = pygame.image.load(image)
         self.scaledImage = pygame.transform.scale(self.image,(width,height))
+        self.name = name
 
-    def draw(self,surface):
+    def draw(self,surface,select):
         box = self.scaledImage.get_rect()
         box.center = self.pos
         surface.blit(self.scaledImage,box)
+        if select == self.name:
+            pygame.draw.rect(surface,(255,255,255),box,2)
 
-    def clicked(self):
+    def clicked(self,event):
         pass
 
 
@@ -60,9 +63,10 @@ colour_passive = pygame.Color('chartreuse4')
 gameIDInput = TextBox(200,200,140,32,colour_passive,'')
 createGame = Button(200,100,140,32,colour_passive,'Create new game!')
 joinGame = Button(200,300,140,32,colour_passive,'Join game with code!')
-char1 = CharSelect(200,440,50,50,'barry.png')
-char2 = CharSelect(300,440,50,50,'barry.png')
-char3 = CharSelect(400,440,50,50,'barry.png')
+char1 = CharSelect(200,440,50,50,'barry.png','Flash')
+char2 = CharSelect(300,440,50,50,'barry.png','Buzz')
+char3 = CharSelect(400,440,50,50,'barry.png','Sensor')
+selected = 'Flash'
 
 active = False
 gameRun = True
@@ -76,11 +80,14 @@ while gameRun:
             if event.type == pygame.QUIT:
                 gameRun = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN: 
-                    if gameIDInput.rect.collidepoint(event.pos): 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                    if gameIDInput.rect.collidepoint(event.pos):
                             active = True
                     else: 
                             active = False
+                    selected = char1.clicked(event,selected)
+                    selected = char2.clicked(event,selected)
+                    selected = char3.clicked(event,selected)
 
             if (event.type == pygame.KEYDOWN) and active:
 
@@ -114,9 +121,9 @@ while gameRun:
         # outside of user's text input 
         gameIDInput.rect.w = max(100, text_surface.get_width()+10)
 
-        char1.draw(screen)
-        char2.draw(screen)
-        char3.draw(screen)
+        char1.draw(screen,selected)
+        char2.draw(screen,selected)
+        char3.draw(screen,selected)
         
         # display.flip() will update only a portion of the 
         # screen to updated, not full area
