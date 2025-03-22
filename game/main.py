@@ -16,6 +16,9 @@ class TextBox:
     def setColour(self,colour):
         self.colour = colour
 
+    def clicked(self):
+        pass
+
 class Button:
     def __init__(self,x,y,width,height,colour,label):
         self.rect = pygame.Rect(x,y,width,height)
@@ -35,11 +38,17 @@ class Image:
 
 class CharSelect:
     def __init__(self,x,y,width,height,image):
+        self.pos = (x,y)
         self.image = pygame.image.load(image)
-        self.rect = self.image.get_rect(topleft=(x,y))
+        self.scaledImage = pygame.transform.scale(self.image,(width,height))
 
     def draw(self,surface):
-        surface.blit(self.image,self.rect)
+        box = self.scaledImage.get_rect()
+        box.center = self.pos
+        surface.blit(self.scaledImage,box)
+
+    def clicked(self):
+        pass
 
 
 
@@ -51,7 +60,9 @@ colour_passive = pygame.Color('chartreuse4')
 gameIDInput = TextBox(200,200,140,32,colour_passive,'')
 createGame = Button(200,100,140,32,colour_passive,'Create new game!')
 joinGame = Button(200,300,140,32,colour_passive,'Join game with code!')
-char1 = CharSelect(150,400,50,50,'barry.png')
+char1 = CharSelect(200,440,50,50,'barry.png')
+char2 = CharSelect(300,440,50,50,'barry.png')
+char3 = CharSelect(400,440,50,50,'barry.png')
 
 active = False
 gameRun = True
@@ -104,6 +115,8 @@ while gameRun:
         gameIDInput.rect.w = max(100, text_surface.get_width()+10)
 
         char1.draw(screen)
+        char2.draw(screen)
+        char3.draw(screen)
         
         # display.flip() will update only a portion of the 
         # screen to updated, not full area
