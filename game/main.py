@@ -337,9 +337,14 @@ def gameLoop(nw):
                     gameRun = False
 
             screen.fill((0,0,0))
-
-            if not message_queue.empty():
-                message = json.load(asyncio.wait_for(message_queue.get(), timeout=0.1))
+            message = None
+            stuff = False
+            try:
+                message = asyncio.wait_for(nw.websocket.recv(), timeout=0.5)
+                stuff = True
+            except:
+                pass
+            if stuff:
                 loadTxt.lastClicked = pygame.time.get_ticks()
                 loadTxt.setText(randomTip(loadTips))
                 state += 1 #this is load area wait for players.
@@ -424,19 +429,7 @@ def gameLoop(nw):
                 
         pygame.display.flip()
 
-
-async def receive_messages(websocket, message_queue):
-    try:
-        while True:
-            message = await websocket.recv()
-            await message_queue.put(message)
-    except websockets.exceptions.ConnectionClosed:
-        print("Connection closed.")
-
-
 uri = "ws://172.22.236.99:8765"
 with connect(uri) as websocket:
     nw = Network(websocket)
-    message_queue=asyncio.Queue()
-    asyncio.create_task(receive_messages(websocket, message_queue))
     gameLoop(nw)
