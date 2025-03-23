@@ -296,7 +296,7 @@ def gameLoop(nw):
                     else:
                         thing = player1.__dict__
                         thing['player'] = 2
-                        nw.join_lobby(thing,gameIDInput.text)
+                        nw.join_lobby(thing,int(gameIDInput.text))
                     state += 1
                 elif char2.clicked(event,screen):
                     player1,p1Img = createPlayer(char2.name,(100,-300),host,[1,1.5,0.5])

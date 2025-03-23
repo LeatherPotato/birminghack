@@ -29,12 +29,9 @@ class Network:
     
 
     def join_lobby(self, playerInfo, code):
-        response = self.request_sender("JOIN_LOBBY", {"code": code, "player_info": playerInfo})
-        
-        if response["response_type"] == "ERROR":
-            return -1
-        else:
-            return response["opponent_info"]
+        print("joining lobby")
+        response = self.request_sender("JOIN_LOBBY", {"code": code, "attributes": playerInfo})
+        return response["opponent_info"]
         
     
     def submit_rap(self, code, player, rap):

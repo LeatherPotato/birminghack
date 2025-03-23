@@ -38,8 +38,8 @@ async def join_lobby(websocket, data):
     code = data["code"]
     attributes = data["attributes"]
     active_games[str(code)].register_player_2(websocket, attributes)
-    await websocket.send({"opponent_attributes": active_games[str(code)].p1_attributes})
-    await active_games[str(code)].p1_socket.send({"opponent_attributes": active_games[str(code)].p2_attributes})
+    await websocket.send(json.dumps({"opponent_info": active_games[str(code)].p1_attributes}))
+    await active_games[str(code)].p1_socket.send(json.dumps({"opponent_info": active_games[str(code)].p2_attributes}))
 
 
 async def submit_rap(websocket, data):
@@ -56,8 +56,8 @@ async def submit_rap(websocket, data):
     active_games[str(code)].raps_submitted+=1
 
     if active_games[str(code)].raps_submitted%2==0:
-        await active_games[str(code)].p1_socket.send({"opponent_rap": active_games[str(code)].p2_rap, "opponent_damage": active_games[str(code)].p2_damage, "your_damage": active_games[str(code)].p1_damage})
-        await active_games[str(code)].p2_socket.send({"opponent_rap": active_games[str(code)].p1_rap, "opponent_damage": active_games[str(code)].p1_damage, "your_damage": active_games[str(code)].p2_damage})
+        await active_games[str(code)].p1_socket.send(json.dumps({"opponent_rap": active_games[str(code)].p2_rap, "opponent_damage": active_games[str(code)].p2_damage, "your_damage": active_games[str(code)].p1_damage}))
+        await active_games[str(code)].p2_socket.send(json.dumps({"opponent_rap": active_games[str(code)].p1_rap, "opponent_damage": active_games[str(code)].p1_damage, "your_damage": active_games[str(code)].p2_damage}))
 
 
 async def handler(websocket):
