@@ -206,7 +206,7 @@ def endRound(fullRap,base_font,host):
 
 
 
-def gameLoop():
+def gameLoop(nw):
         
     base_font = pygame.font.Font(None, 32)
     background = pygame.image.load('background.png')
@@ -382,4 +382,13 @@ def gameLoop():
                 
         pygame.display.flip()
 
-gameLoop()
+
+
+from websockets.sync.client import connect
+from network import Network
+
+
+uri = "ws://localhost:8765"
+with connect(uri) as websocket:
+    nw = Network(websocket)
+    gameLoop(nw)

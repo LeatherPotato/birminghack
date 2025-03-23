@@ -52,8 +52,8 @@ async def submit_rap(websocket, data):
     active_games[str(code)].raps_submitted+=1
 
     if active_games[str(code)].raps_submitted%2==0:
-        await active_games[str(code)].p1_socket.send({"opponent_rap": active_games[str(code)].p2_rap, "damage_dealt": damage, "damage_taken": damage})
-        await active_games[str(code)].p2_socket.send({"opponent_attributes": active_games[str(code)].p1_attributes, "damage": damage})
+        await active_games[str(code)].p1_socket.send({"opponent_rap": active_games[str(code)].p2_rap, "player_attributes": active_games[str(code)].p1_attributes, "opponent_attributes": active_games[str(code)].p2_attributes, "damage": damage})
+        await active_games[str(code)].p2_socket.send({"opponent_rap": active_games[str(code)].p1_rap, "player_attributes": active_games[str(code)].p2_attributes, "opponent_attributes": active_games[str(code)].p1_attributes, "damage": damage})
 
 
 async def handler(websocket):

@@ -14,13 +14,10 @@ class Network:
             return json.load(response)
         except:
             pass
+
     def create_lobby(self, playerInfo):
         response = self._request_sender(self, "CREATE_LOBBY", playerInfo)
-
-        if response["response_type"] == "ERROR":
-            return -1
-        else:
-            return response["code"]
+        return response["code"]
 
  
     def join_lobby(self, playerInfo, code):
@@ -32,7 +29,7 @@ class Network:
             return response["opponent_info"]
 
     def _opponent_joined_lobby():
-        ...
+        
 
 
 net = Network()
