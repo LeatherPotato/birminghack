@@ -1,5 +1,6 @@
 from websockets.sync.client import connect
 import json
+import asyncio
 
 
 class Network:
@@ -15,19 +16,20 @@ class Network:
             print("sending request 3...")
             response = self.websocket.recv()
             print("sending request 4...")
-            return json.load(response)
-        except:
-            print("oh no eror :()")
+            print(response)
+            return json.loads(response)
+        except Exception as e:
+            print(e)
 
     def create_lobby(self, playerInfo):
         print("started creating lobby")
-        response = self.request_sender(self, "CREATE_LOBBY", playerInfo)
+        response = self.request_sender("CREATE_LOBBY", playerInfo)
         print("got response from request builder")
-        return response["code"]
+        return response.get("code")
     
 
     def join_lobby(self, playerInfo, code):
-        response = self.request_sender(self, "JOIN_LOBBY", {"code": code, "player_info": playerInfo})
+        response = self.request_sender("JOIN_LOBBY", {"code": code, "player_info": playerInfo})
         
         if response["response_type"] == "ERROR":
             return -1
@@ -36,6 +38,6 @@ class Network:
         
     
     def submit_rap(self, code, player, rap):
-        response = self.request_sender(self, "SUBMIT_RAP", {"code": code, "player": player, "rap": rap})
+        response = self.request_sender("SUBMIT_RAP", {"code": code, "player": player, "rap": rap})
         return response
      

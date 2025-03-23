@@ -29,6 +29,8 @@ async def create_lobby(websocket, attributes):
     while str(code) in active_games.keys():
         code = random.randint(1000, 9999)
     active_games[str(code)] = Game(websocket, attributes)
+    print(json.dumps({"code": code}))
+    print(active_games)
     await websocket.send(json.dumps({"code": code}))
 
 
@@ -62,17 +64,21 @@ async def handler(websocket):
     while True:
         try:
             data = await websocket.recv()
-            data = json.dump(data)
+            data = json.loads(data)
+            print(data)
             match data["request_type"]:
                 case "CREATE_LOBBY":
+                    print("creating lobby")
                     await create_lobby(websocket, data["data"])
                     break
 
                 case "JOIN_LOBBY":
+                    print("joining lobby")
                     await join_lobby(websocket, data["data"])
                     break
 
                 case "SUBMIT_RAP":
+                    print("submitting rap")
                     await submit_rap(websocket, data["data"])
 
         except ConnectionClosed:
