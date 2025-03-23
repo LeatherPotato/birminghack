@@ -24,6 +24,7 @@ class Button:
         self.font = font
         self.border = 1
         self.lastClicked = -5000
+        self.active = False
 
     def setColour(self,colour):
         self.colour = colour
@@ -57,18 +58,59 @@ class Button:
         else:
             self.border = 1
             self.colour = pygame.Color('chartreuse4')
+
+    def textBoxCode(self,event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                self.colour = pygame.Color('lightskyblue3')
+                self.active = True
+            else:
+                self.colour = pygame.Color('chartreuse4')
+                self.active = False
+
+    def activeCode(self,event):
+        if (event.type == pygame.KEYDOWN) and self.active:
+            if event.key == pygame.K_BACKSPACE:  
+                    self.text = self.text[:-1] 
+            else: 
+                    self.text += event.unicode
+            
         
 
 
 
 class Animation:
-    def __init__(self,x,y,width,height,images):
+    def __init__(self,offset,width,height,pics,host,multiList):
         self.images = []
-        for image in images:
-            self.image.append(pygame.image.load(image))
+        self.width = width
+        self.height = height
+        for pic in pics:
+            self.images.append(pygame.image.load(pic))
+        self.lastChange = -5000
+        self.num = 0
+        self.num2= 0
+        self.currentImage = pygame.transform.scale(self.images[self.num],(self.width,self.height))
+        self.offset = offset
+        self.host = host
+        self.multi = multiList
 
-    def setImage(self,image):
-        self.image = image
+    def setImage(self):
+        self.num += 1
+        if self.num >= len(self.images):
+            self.num = 0
+        self.currentImage = pygame.transform.scale(self.images[self.num],(self.width*self.multi[self.num2],self.height*self.multi[self.num2]))
+
+    def setImageSize(self):
+        self.num2 += 1
+        if self.num2 >= len(self.multi):
+            self.num2 = 0
+        self.currentImage = pygame.transform.scale(self.images[self.num],(self.width*self.multi[self.num2],self.height*self.multi[self.num2]))
+        
+
+    def draw(self,surface):
+        box = self.currentImage.get_rect()
+        box.center = (surface.get_width()//2 + self.offset[1],surface.get_height()//2 + self.offset[0])
+        surface.blit(self.currentImage,box)
 
 class CharSelect:
     def __init__(self,y,x,width,height,image,altImage,name):
@@ -121,15 +163,22 @@ class Player:
     def damage(self,damage):
         self.health -= damage
 
-def createPlayer(name):
+def createPlayer(name,offset,host):
+    if host:
+        multi = [1,1.5,0,5]
+    else:
+        multi = [1,0.5,1.5]
     match name:
         case "Flash":
             user = Player(name,'cold','hot','',0.5,1.5)
+            img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
         case "Buzz":
             user = Player(name,'anxiety','nature','',1.5,0.5)
+            img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
         case "Sensor":
             user = Player(name,'parent','brainrot','',1,1)
-    return user
+            img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
+    return user,img
 
 def randomTip(loadTips):
     return loadTips[random.randint(0,len(loadTips)-1)]
@@ -157,12 +206,17 @@ def gameLoop():
     #state 3
     loadTxt = Button(140,32,(255,255,255),randomTip(loadTips),base_font)
     #state 4
-    rapInput = Button(140,32,colour_passive,'',base_font)
-    attack = Button(140,32,colour_passive,'',base_font)
+    rapInput1 = Button(140,32,colour_passive,'',base_font)
+    rapInput2 = Button(140,32,colour_passive,'',base_font)
+    rapInput3 = Button(140,32,colour_passive,'',base_font)
+    rapInput4 = Button(140,32,colour_passive,'',base_font)
+    timerTxt = Button(140,32,(255,255,255),'10',base_font)
 
     active = False
+    rapActive = 0
     gameRun = True
     state = 1
+    subState = True
 
     while gameRun:
         dt = clock.tick(30)
@@ -172,36 +226,17 @@ def gameLoop():
                 if event.type == pygame.QUIT:
                     gameRun = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if gameIDInput.rect.collidepoint(event.pos):
-                            active = True
-                    else: 
-                            active = False
+                gameIDInput.textBoxCode(event)
+                gameIDInput.activeCode(event)
                     
                 if createGame.clicked(event):
                     state += 1 #create a game
+                    host = True
                 elif joinGame.clicked(event):
                     state += 1 #join a game
+                    host = False
 
-                if (event.type == pygame.KEYDOWN) and active:
-                    
-                    if event.key == pygame.K_BACKSPACE: 
-
-                            # get text input from 0 to -1 i.e. end. 
-                            gameIDInput.text = gameIDInput.text[:-1] 
-
-                    # Unicode standard is used for string 
-                    # formation 
-                    else: 
-                            gameIDInput.text += event.unicode
-            
-            # it will set background color of screen 
             screen.fill((0,0,0))
-
-            if active: 
-                    gameIDInput.setColour(colour_active)
-            else: 
-                    gameIDInput.setColour(colour_passive)
 
             gameIDInput.draw(screen,(0,0))
             createGame.draw(screen,(-100,0))
@@ -215,13 +250,13 @@ def gameLoop():
                     gameRun = False
 
                 if char1.clicked(event,screen):
-                    player1 = createPlayer(char1.name)
+                    player1,p1Img = createPlayer(char1.name,(100,-300),host)
                     state += 1
                 elif char2.clicked(event,screen):
-                    player1 = createPlayer(char2.name)
+                    player1,p1Img = createPlayer(char2.name,(100,-300),host)
                     state += 1
                 elif char3.clicked(event,screen):
-                    player1 = createPlayer(char3.name)
+                    player1,p1Img = createPlayer(char3.name,(100,-300),host)
                     state += 1
                 
 
@@ -241,11 +276,11 @@ def gameLoop():
 
             screen.fill((0,0,0))
 
-            if pygame.time.get_ticks() - loadTxt.lastClicked > 50000:
+            if pygame.time.get_ticks() - loadTxt.lastClicked > 5000:
                 loadTxt.lastClicked = pygame.time.get_ticks()
                 loadTxt.setText(randomTip(loadTips))
                 state += 1 #this is load area wait for players.
-                player2 = createPlayer('Sensor')
+                player2,p2Img = createPlayer('Sensor',(-100,300),host)
 
             loadTxt.draw(screen,(0,0))
         elif state == 4:
@@ -254,7 +289,44 @@ def gameLoop():
                 if event.type == pygame.QUIT:
                     gameRun = False
 
+                if subState:
+                    rapInput1.textBoxCode(event)
+                    rapInput2.textBoxCode(event)
+                    rapInput3.textBoxCode(event)
+                    rapInput4.textBoxCode(event)
+
+                    rapInput1.activeCode(event)
+                    rapInput2.activeCode(event)
+                    rapInput3.activeCode(event)
+                    rapInput4.activeCode(event)
+
             screen.fill((0,0,0))
+
+            if pygame.time.get_ticks() - p1Img.lastChange > 1000:
+                p1Img.setImage()
+                p1Img.lastChange = pygame.time.get_ticks()
+            if pygame.time.get_ticks() - p2Img.lastChange > 1000:
+                p2Img.setImage()
+                p2Img.lastChange = pygame.time.get_ticks()
+            if (pygame.time.get_ticks() - timerTxt.lastClicked > 1000) and subState:
+                if timerTxt.text == '0':
+                    timerTxt.setText('180')
+                    subState = False
+                    #send rap
+                    #recieve rap
+                    #send damange
+                    #recieve damage
+                timerTxt.setText(str(int(timerTxt.text) - 1))
+                timerTxt.lastClicked = pygame.time.get_ticks()
+
+            p1Img.draw(screen)
+            p2Img.draw(screen)
+            if subState:
+                rapInput1.draw(screen,(50,0))
+                rapInput2.draw(screen,(100,0))
+                rapInput3.draw(screen,(150,0))
+                rapInput4.draw(screen,(200,0))
+                timerTxt.draw(screen,(-230,-430))
                 
 
                 
