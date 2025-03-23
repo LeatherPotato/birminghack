@@ -14,6 +14,7 @@ with connect(uri) as websocket:
         s = input()
         if s == "q":
             websocket.send(s)
+            break
 
     greeting = websocket.recv()
     print(f"<<< {greeting}")
