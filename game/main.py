@@ -8,7 +8,7 @@ import json
 import pygame,random
 
 pygame.init()
-menuMucic = 'Loading_Screen.wav'
+menuMusic = 'Loading_Screen.wav'
 pygame.mixer.init()
 pygame.mixer.music.load(menuMusic)
 pygame.mixer.music.play()
