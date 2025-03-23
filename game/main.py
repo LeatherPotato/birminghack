@@ -176,13 +176,13 @@ def createPlayer(name,offset,host,multi):
     match name:
         case "Flash":
             user = Player(name,'cold','hot','',0.5,1.5,host)
-            img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
+            img = Animation(offset,200,200,['flash_pics/flash.png','flash_pics/flash1.png','flash_pics/flash.png','flash_pics/flash2.png'],host,multi)
         case "Buzz":
             user = Player(name,'anxiety','nature','',1.5,0.5,host)
-            img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
+            img = Animation(offset,200,200,['buzz_pics/buzz.png','buzz_pics/buzz1.png','buzz_pics/buzz.png','buzz_pics/buzz2.png'],host,multi)
         case "Sensor":
             user = Player(name,'parent','brainrot','',1,1,host)
-            img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
+            img = Animation(offset,200,200,['sensor_pics/sensor.png','sensor_pics/sensor1.png','sensor_pics/sensor.png','sensor_pics/sensor2.png'],host,multi)
     return user,img
 
 def randomTip(loadTips):
@@ -231,9 +231,9 @@ def gameLoop(nw):
     createGame = Button(140,32,colour_passive,'Create new game!',base_font)
     joinGame = Button(140,32,colour_passive,'Join game with code!',base_font)
     #state2
-    char1 = CharSelect(-200,0,100,100,'barry.png','miku.png','Flash')
-    char2 = CharSelect(0,0,100,100,'barry.png','miku.png','Buzz')
-    char3 = CharSelect(200,0,100,100,'barry.png','miku.png','Sensor')
+    char1 = CharSelect(-200,0,100,100,'flash_pics/flash.png','names_pics/flashname.png','Flash')
+    char2 = CharSelect(0,0,100,100,'buzz_pics/buzz.png','names_pics/buzzname.png','Buzz')
+    char3 = CharSelect(200,0,100,100,'sensor_pics/sensor.png','names_pics/sensorname.png','Sensor')
     selectTxt = Button(140,32,(255,255,255),'SELECT YOUR FIGHTER!',base_font)
     #state 3
     loadTxt = Button(140,32,(255,255,255),randomTip(loadTips),base_font)
@@ -430,7 +430,7 @@ async def receive_messages(websocket, message_queue):
         print("Connection closed.")
 
 
-uri = "ws://localhost:8765"
+uri = "ws://172.22.236.99:8765"
 with connect(uri) as websocket:
     nw = Network(websocket)
     message_queue=asyncio.Queue()
