@@ -292,7 +292,7 @@ def gameLoop(nw):
                     if host==True:
                         thing = player1.__dict__
                         thing['player'] = 1
-                        codeTxt.setText(nw.create_lobby(thing))
+                        codeTxt.setText(str(nw.create_lobby(thing)))
                     else:
                         thing = player1.__dict__
                         thing['player'] = 2
@@ -303,7 +303,7 @@ def gameLoop(nw):
                     if host==True:
                         thing = player1.__dict__
                         thing['player'] = 1
-                        codeTxt.setText(nw.create_lobby(thing))
+                        codeTxt.setText(str(nw.create_lobby(thing)))
                     else:
                         thing = player1.__dict__
                         thing['player'] = 2
@@ -314,7 +314,7 @@ def gameLoop(nw):
                     if host==True:
                         thing = player1.__dict__
                         thing['player'] = 1
-                        codeTxt.setText(nw.create_lobby(thing))
+                        codeTxt.setText(str(nw.create_lobby(thing)))
                     else:
                         thing = player1.__dict__
                         thing['player'] = 2
