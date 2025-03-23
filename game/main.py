@@ -4,11 +4,11 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-screen = pygame.display.set_mode([600, 500])
+screen = pygame.display.set_mode([1000, 500])
 
 class Button:
-    def __init__(self,x,y,width,height,colour,text,font):
-        self.rect = pygame.Rect(x,y,width,height)
+    def __init__(self,width,height,colour,text,font):
+        self.rect = pygame.Rect(0,0,width,height)
         self.colour = colour
         self.text = text
         self.font = font
@@ -57,35 +57,65 @@ class Image:
         self.image = image
 
 class CharSelect:
-    def __init__(self,x,y,width,height,image,name):
-        self.pos = (x,y)
+    def __init__(self,y,x,width,height,image,altImage,name):
+        self.offset = (x,y)
         self.image = pygame.image.load(image)
         self.scaledImage = pygame.transform.scale(self.image,(width,height))
+        self.altImage = pygame.image.load(altImage)
+        self.altScaledImage = pygame.transform.scale(self.altImage,(width,height))
         self.name = name
+        self.currentImage = self.scaledImage
+        self.lastClicked = -5000
+        self.border = 1
 
-    def draw(self,surface,select):
-        box = self.scaledImage.get_rect()
-        box.center = self.pos
-        surface.blit(self.scaledImage,box)
-        if select == self.name:
-            pygame.draw.rect(surface,(255,255,255),box,2)
+    def draw(self,surface):
+        box = self.currentImage.get_rect()
+        box.center = (surface.get_width()//2 + self.offset[1],surface.get_height()//2 + self.offset[0])
+        surface.blit(self.currentImage,box)
+        pygame.draw.rect(surface,(255,255,255),box,self.border)
 
-    def clicked(self,event,select):
-        box = self.scaledImage.get_rect()
-        box.center = self.pos
-        if box.collidepoint(event.pos):
-            return self.name
+    def clicked(self,event,surface):
+        box = self.currentImage.get_rect()
+        box.center = (surface.get_width()//2 + self.offset[1],surface.get_height()//2 + self.offset[0])
+        self.hover(box)
+        returner = False
+        if event.type == pygame.MOUSEBUTTONDOWN and pygame.time.get_ticks() - self.lastClicked > 100:
+            if box.collidepoint(event.pos):
+                self.border = 1
+                self.lastClicked = pygame.time.get_ticks()
+                returner =  True
+        return returner
+
+    def hover(self,box):
+        if box.collidepoint(pygame.mouse.get_pos()):
+            self.border = 3
+            self.currentImage = self.altScaledImage
         else:
-            return select
+            self.border = 1
+            self.currentImage = self.scaledImage
 
 class Player:
-    def __init__(self,name,weakness,strength,rap,defence):
+    def __init__(self,name,weakness,strength,rap,defence,lethality):
         self.health = 100
         self.name = name
         self.weakness = weakness
         self.strength = strength
         self.rapTxt = rap
-        self.defence = defense
+        self.defence = defence
+        self.lethality = lethality
+
+    def damage(self,damage):
+        self.health -= damage
+
+def createPlayer(name):
+    match name:
+        case "Flash":
+            user = Player(name,'cold','hot','',0.5,1.5)
+        case "Buzz":
+            user = Player(name,'anxiety','nature','',1.5,0.5)
+        case "Sensor":
+            user = Player(name,'parent','brainrot','',1,1)
+    return user
 
 
 
@@ -94,21 +124,25 @@ base_font = pygame.font.Font(None, 32)
 colour_active = pygame.Color('lightskyblue3')
 colour_passive = pygame.Color('chartreuse4')
 
-gameIDInput = Button(200,200,140,32,colour_passive,'',base_font)
-createGame = Button(200,100,140,32,colour_passive,'Create new game!',base_font)
-joinGame = Button(200,300,140,32,colour_passive,'Join game with code!',base_font)
-char1 = CharSelect(200,440,50,50,'barry.png','Flash')
-char2 = CharSelect(300,440,50,50,'barry.png','Buzz')
-char3 = CharSelect(400,440,50,50,'barry.png','Sensor')
-selected = 'Flash'
+#state 1
+gameIDInput = Button(140,32,colour_passive,'',base_font)
+createGame = Button(140,32,colour_passive,'Create new game!',base_font)
+joinGame = Button(140,32,colour_passive,'Join game with code!',base_font)
+#state2
+char1 = CharSelect(-200,0,100,100,'barry.png','miku.png','Flash')
+char2 = CharSelect(0,0,100,100,'barry.png','miku.png','Buzz')
+char3 = CharSelect(200,0,100,100,'barry.png','miku.png','Sensor')
+selectTxt = Button(140,32,(255,255,255),'SELECT YOUR FIGHTER!',base_font)
+#state 3
+#state 4
 
 active = False
 gameRun = True
-state = True
+state = 1
 
 while gameRun:
     dt = clock.tick(30)
-    if state:
+    if state == 1:
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
@@ -119,15 +153,11 @@ while gameRun:
                         active = True
                 else: 
                         active = False
-
-                selected = char1.clicked(event,selected)
-                selected = char2.clicked(event,selected)
-                selected = char3.clicked(event,selected)
                 
             if createGame.clicked(event):
-                state = False #create a game
-            if joinGame.clicked(event):
-                state = False #join a game
+                state += 1 #create a game
+            elif joinGame.clicked(event):
+                state += 1 #join a game
 
             if (event.type == pygame.KEYDOWN) and active:
                 
@@ -152,13 +182,39 @@ while gameRun:
         gameIDInput.draw(screen,(0,0))
         createGame.draw(screen,(-100,0))
         joinGame.draw(screen,(100,0))
-
-        char1.draw(screen,selected)
-        char2.draw(screen,selected)
-        char3.draw(screen,selected)
         
         # display.flip() will update only a portion of the 
         # screen to updated, not full area
-    else:
-        pass
+    elif state == 2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameRun = False
+
+            if char1.clicked(event,screen):
+                createPlayer(char1.name)
+                state += 1
+            elif char2.clicked(event,screen):
+                createPlayer(char2.name)
+                state += 1
+            elif char3.clicked(event,screen):
+                createPlayer(char3.name)
+                state += 1
+            
+
+        screen.fill((0,0,0))
+
+        char1.draw(screen)
+        char2.draw(screen)
+        char3.draw(screen)
+
+        selectTxt.draw(screen,(-100,0))
+    elif state == 3:
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                gameRun = False
+
+        screen.fill((0,0,0))
+
+            
     pygame.display.flip()
