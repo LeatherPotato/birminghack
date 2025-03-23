@@ -290,33 +290,33 @@ def gameLoop(nw):
                 if char1.clicked(event,screen):
                     player1,p1Img = createPlayer(char1.name,(100,-300),host,[1,1.5,0.5])
                     if host==True:
-                        thing = player1.__dict__()
+                        thing = player1.__dict__
                         thing['player'] = 1
                         codeTxt.setText(nw.create_lobby(thing))
                     else:
-                        thing = player1.__dict__()
+                        thing = player1.__dict__
                         thing['player'] = 2
                         nw.join_lobby(thing,gameIDInput.text)
                     state += 1
                 elif char2.clicked(event,screen):
                     player1,p1Img = createPlayer(char2.name,(100,-300),host,[1,1.5,0.5])
                     if host==True:
-                        thing = player1.__dict__()
+                        thing = player1.__dict__
                         thing['player'] = 1
                         codeTxt.setText(nw.create_lobby(thing))
                     else:
-                        thing = player1.__dict__()
+                        thing = player1.__dict__
                         thing['player'] = 2
                         nw.join_lobby(thing,gameIDInput.text)
                     state += 1
                 elif char3.clicked(event,screen):
                     player1,p1Img = createPlayer(char3.name,(100,-300),host,[1,1.5,0.5])
                     if host==True:
-                        thing = player1.__dict__()
+                        thing = player1.__dict__
                         thing['player'] = 1
                         codeTxt.setText(nw.create_lobby(thing))
                     else:
-                        thing = player1.__dict__()
+                        thing = player1.__dict__
                         thing['player'] = 2
                         nw.join_lobby(thing,gameIDInput.text)
                     state += 1
