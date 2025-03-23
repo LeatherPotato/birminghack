@@ -151,7 +151,7 @@ class CharSelect:
             self.currentImage = self.scaledImage
 
 class Player:
-    def __init__(self,name,weakness,strength,rap,defence,lethality):
+    def __init__(self,name,weakness,strength,rap,defence,lethality,host):
         self.health = 100
         self.name = name
         self.weakness = weakness
@@ -159,9 +159,11 @@ class Player:
         self.rapTxt = rap
         self.defence = defence
         self.lethality = lethality
+        self.host = host
 
     def damage(self,damage):
         self.health -= damage
+        
 
 def createPlayer(name,offset,host):
     if host:
@@ -170,18 +172,39 @@ def createPlayer(name,offset,host):
         multi = [1,0.5,1.5]
     match name:
         case "Flash":
-            user = Player(name,'cold','hot','',0.5,1.5)
+            user = Player(name,'cold','hot','',0.5,1.5,host)
             img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
         case "Buzz":
-            user = Player(name,'anxiety','nature','',1.5,0.5)
+            user = Player(name,'anxiety','nature','',1.5,0.5,host)
             img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
         case "Sensor":
-            user = Player(name,'parent','brainrot','',1,1)
+            user = Player(name,'parent','brainrot','',1,1,host)
             img = Animation(offset,200,200,['miku.png','miku1.png','miku.png','miku2.png'],host,multi)
     return user,img
 
 def randomTip(loadTips):
     return loadTips[random.randint(0,len(loadTips)-1)]
+
+def endRound(fullRap,base_font,host):
+    enemyRap = ['I','Heart','big','balls']
+    if host:
+        raps = fullRap
+        rap2 = enemyRap
+    else:
+        raps = enemyRap
+        rap2 = fullRap
+    #send rap
+    #recieve rap
+    #send damange
+    #recieve damage
+    damageRecieved = 50
+    damageDone = 30
+    #player1.damage(damageRecieved)
+    #player2.damage(damageDone)
+    rapLines = []
+    for rap in raps:
+        rapLines.append(Button(140,32,(255,255,255),rap,base_font))
+    return rapLines, rap2, damageRecieved, damageDone
     
 
 
@@ -211,6 +234,9 @@ def gameLoop():
     rapInput3 = Button(140,32,colour_passive,'',base_font)
     rapInput4 = Button(140,32,colour_passive,'',base_font)
     timerTxt = Button(140,32,(255,255,255),'10',base_font)
+    p1DmgTxt = Button(140,32,(255,255,255),'Health: 100',base_font)
+    p2DmgTxt = Button(140,32,(255,255,255),'Health: 100',base_font)
+    
 
     active = False
     rapActive = 0
@@ -242,8 +268,6 @@ def gameLoop():
             createGame.draw(screen,(-100,0))
             joinGame.draw(screen,(100,0))
             
-            # display.flip() will update only a portion of the 
-            # screen to updated, not full area
         elif state == 2:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -310,14 +334,36 @@ def gameLoop():
                 p2Img.lastChange = pygame.time.get_ticks()
             if (pygame.time.get_ticks() - timerTxt.lastClicked > 1000) and subState:
                 if timerTxt.text == '0':
-                    timerTxt.setText('180')
+                    timerTxt.setText('181')
                     subState = False
-                    #send rap
-                    #recieve rap
-                    #send damange
-                    #recieve damage
+                    fullRap = [rapInput1.text,rapInput2.text,rapInput3.text,rapInput4.text]
+                    rapTxts, rapNew, damageRecieved, damageDone = endRound(fullRap, base_font, host)
+                    p1Img.setImageSize()
+                    p2Img.setImageSize()
                 timerTxt.setText(str(int(timerTxt.text) - 1))
                 timerTxt.lastClicked = pygame.time.get_ticks()
+            if  (not subState) and (pygame.time.get_ticks() - timerTxt.lastClicked > 10000) and (p1Img.num2 == 1): #need to be time taken for rap to be read out
+                p1Img.setImageSize()
+                p2Img.setImageSize()
+                for i in range(0,len(rapTxts)):
+                    rapTxts[i].setText(rapNew[i])
+                if host:
+                    player2.damage(damageDone)
+                    p2DmgTxt.setText('Health: ' + str(player2.health))
+                else:
+                    player1.damage(damageRecieved)
+                    p1DmgTxt.setText('Health: ' + str(player1.health))
+            elif  (not subState) and (pygame.time.get_ticks() - timerTxt.lastClicked > 20000) and (p1Img.num2 == 2): #need to be time taken for rap to be read out
+                p1Img.setImageSize()
+                p2Img.setImageSize()
+                if host:
+                    player1.damage(damageRecieved)
+                    p1DmgTxt.setText('Health: ' + str(player1.health))
+                    
+                else:
+                    player2.damage(damageDone)
+                    p2DmgTxt.setText('Health: ' + str(player2.health))
+                subState = True
 
             p1Img.draw(screen)
             p2Img.draw(screen)
@@ -327,6 +373,12 @@ def gameLoop():
                 rapInput3.draw(screen,(150,0))
                 rapInput4.draw(screen,(200,0))
                 timerTxt.draw(screen,(-230,-430))
+            else:
+                for i in range(0,len(rapTxts)):
+                    rapTxts[i].draw(screen,(32*i,0))
+            p1DmgTxt.draw(screen,(230,-430))
+            p2DmgTxt.draw(screen,(-230,430))
+
                 
 
                 
