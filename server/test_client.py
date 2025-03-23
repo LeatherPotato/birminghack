@@ -1,11 +1,21 @@
 from websockets.sync.client import connect
 
+uri = "ws://localhost:8765"
+with connect(uri) as websocket:
+    name = input("What's your name? ")
 
-def hello():
-    with connect("ws://172.22.236.99:8765") as websocket:
-        websocket.send("Hello world!")
-        message = websocket.recv()
-        print(f"Received: {message}")
+    websocket.send(name)
+    print(f">>> {name}")
+
+    greeting = websocket.recv()
+    print(f"<<< {greeting}")
+
+    while True:
+        s = input()
+        if s == "q":
+            websocket.send(s)
+
+    greeting = websocket.recv()
+    print(f"<<< {greeting}")
 
 
-hello()
