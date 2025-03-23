@@ -165,11 +165,7 @@ class Player:
         self.health -= damage
         
 
-def createPlayer(name,offset,host):
-    if host:
-        multi = [1,1.5,0,5]
-    else:
-        multi = [1,0.5,1.5]
+def createPlayer(name,offset,host,multi):
     match name:
         case "Flash":
             user = Player(name,'cold','hot','',0.5,1.5,host)
@@ -213,6 +209,8 @@ def endRound(fullRap,base_font,host):
 def gameLoop():
         
     base_font = pygame.font.Font(None, 32)
+    background = pygame.image.load('background.png')
+    background = pygame.transform.scale(background,(1000,500))
 
     colour_active = pygame.Color('lightskyblue3')
     colour_passive = pygame.Color('chartreuse4')
@@ -274,13 +272,13 @@ def gameLoop():
                     gameRun = False
 
                 if char1.clicked(event,screen):
-                    player1,p1Img = createPlayer(char1.name,(100,-300),host)
+                    player1,p1Img = createPlayer(char1.name,(100,-300),host,[1,1.5,0.5])
                     state += 1
                 elif char2.clicked(event,screen):
-                    player1,p1Img = createPlayer(char2.name,(100,-300),host)
+                    player1,p1Img = createPlayer(char2.name,(100,-300),host,[1,1.5,0.5])
                     state += 1
                 elif char3.clicked(event,screen):
-                    player1,p1Img = createPlayer(char3.name,(100,-300),host)
+                    player1,p1Img = createPlayer(char3.name,(100,-300),host,[1,1.5,0.5])
                     state += 1
                 
 
@@ -304,7 +302,7 @@ def gameLoop():
                 loadTxt.lastClicked = pygame.time.get_ticks()
                 loadTxt.setText(randomTip(loadTips))
                 state += 1 #this is load area wait for players.
-                player2,p2Img = createPlayer('Sensor',(-100,300),host)
+                player2,p2Img = createPlayer('Sensor',(-100,300),host,[1,0.5,1.5])
 
             loadTxt.draw(screen,(0,0))
         elif state == 4:
@@ -324,7 +322,7 @@ def gameLoop():
                     rapInput3.activeCode(event)
                     rapInput4.activeCode(event)
 
-            screen.fill((0,0,0))
+            screen.blit(background,(0,0))
 
             if pygame.time.get_ticks() - p1Img.lastChange > 1000:
                 p1Img.setImage()
