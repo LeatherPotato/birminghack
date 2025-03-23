@@ -20,20 +20,19 @@ class Network:
         if response["response_type"] == "ERROR":
             return -1
         else:
-            return response["data"]["room_code"]
+            return response["code"]
 
-        
+ 
     def join_lobby(self, playerInfo, code):
         response = self._request_sender(self, "JOIN_LOBBY", {"code": code, "player_info": playerInfo})
         
         if response["response_type"] == "ERROR":
             return -1
         else:
-            return response["data"]["opponent_info"]
+            return response["opponent_info"]
 
     def _opponent_joined_lobby():
         ...
 
+
 net = Network()
-
-

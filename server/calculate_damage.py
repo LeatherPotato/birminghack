@@ -1,18 +1,18 @@
 import pronouncing
 from sentence_transformers import SentenceTransformer, util
 
-# Testing with values
-oppStrength = "slaying" # Opponent's strength
-oppWeakness = "tea"     # Opponent's weakness
-opponent_defence = 0.25 # 25% damage reduction
-player_lethality = 15   # Base damage of the player
-
-rap_lines = [
-    "That check dropping, paying",
-    "Cause they fall, yeah, they get slain",
-    "It's scalding hot like tea",
-    "But honestly with it you can't even see"
-]
+# # Testing with values
+# oppStrength = "slaying" # Opponent's strength
+# oppWeakness = "tea"     # Opponent's weakness
+# opponent_defence = 0.25 # 25% damage reduction
+# player_lethality = 15   # Base damage of the player
+#
+# rap_lines = [
+#     "That check dropping, paying",
+#     "Cause they fall, yeah, they get slain",
+#     "It's scalding hot like tea",
+#     "But honestly with it you can't even see"
+# ]
 
 # The model to calculate the similarity score
 model = SentenceTransformer('sentence-transformers/nli-mpnet-base-v2')
@@ -79,51 +79,53 @@ BONUS_SYLLABLE_MULT = 1.1
 
 # Damage calculation loop
 
-# This list keeps track of the damage of each line
-damage_results = []
+def calc_damage(rap_lines, oppStrength, oppWeakness, opponent_defence, player_lethality):
 
-# rap_lines in this case is 4
-for i in range(len(rap_lines)):
-    # Get the first line
-    line = rap_lines[i]
-    
-    # Calculate normalized similarity scores against opponent's strength and weakness
-    strength_score = round(get_similarity(line, oppStrength), 2)
-    weakness_score = round(get_similarity(line, oppWeakness), 2)
-    
-    # Calculate similarity ratio using normalized scores (avoid division by zero by checking strength_score)
-    if strength_score == 0:
-        similarity_ratio = 0
-    else:
-        similarity_ratio = round(weakness_score / strength_score, 2)
-    
-    # Initialize bonus multipliers
-    rhyme_bonus = DEFAULT_RHYME_BONUS
-    syllable_bonus = DEFAULT_SYLLABLE_BONUS
+    # This list keeps track of the damage of each line
+    damage_results = []
 
-    # Compare the current line with all other lines
-    for j in range(len(rap_lines)):
-        if i == j:
-            continue  # Skip self-comparison
+    # rap_lines in this case is 4
+    for i in range(len(rap_lines)):
+        # Get the first line
+        line = rap_lines[i]
         
-        if check_rhyme(line, rap_lines[j]):
-            rhyme_bonus = BONUS_RHYME_MULT
-        if check_same_syllable_count(line, rap_lines[j]):
-            syllable_bonus = BONUS_SYLLABLE_MULT
+        # Calculate normalized similarity scores against opponent's strength and weakness
+        strength_score = round(get_similarity(line, oppStrength), 2)
+        weakness_score = round(get_similarity(line, oppWeakness), 2)
+        
+        # Calculate similarity ratio using normalized scores (avoid division by zero by checking strength_score)
+        if strength_score == 0:
+            similarity_ratio = 0
+        else:
+            similarity_ratio = round(weakness_score / strength_score, 2)
+        
+        # Initialize bonus multipliers
+        rhyme_bonus = DEFAULT_RHYME_BONUS
+        syllable_bonus = DEFAULT_SYLLABLE_BONUS
 
-    # Calculate total multiplier and final damage
-    # Round so the damage is in integers only
-    total_multiplier = similarity_ratio * rhyme_bonus * syllable_bonus
-    damage = round(player_lethality * total_multiplier * (1 - opponent_defence))
-    damage_results.append(damage)
+        # Compare the current line with all other lines
+        for j in range(len(rap_lines)):
+            if i == j:
+                continue  # Skip self-comparison
+            
+            if check_rhyme(line, rap_lines[j]):
+                rhyme_bonus = BONUS_RHYME_MULT
+            if check_same_syllable_count(line, rap_lines[j]):
+                syllable_bonus = BONUS_SYLLABLE_MULT
 
-    # Testing
-    print("Line", i + 1, ":", line)
-    print("  Strength Score:", strength_score, ", Weakness Score:", weakness_score)
-    print("  Similarity Ratio:", similarity_ratio)
-    print("  Rhyme Bonus:", rhyme_bonus, ", Syllable Bonus:", syllable_bonus)
-    print("  => Damage:", damage, "\n")
+        # Calculate total multiplier and final damage
+        # Round so the damage is in integers only
+        total_multiplier = similarity_ratio * rhyme_bonus * syllable_bonus
+        damage = round(player_lethality * total_multiplier * (1 - opponent_defence))
+        damage_results.append(damage)
 
-# Find the total sum of damage
-total_damage = sum(damage_results)
-print("Total Damage Dealt:", total_damage)
+        # Testing
+        print("Line", i + 1, ":", line)
+        print("  Strength Score:", strength_score, ", Weakness Score:", weakness_score)
+        print("  Similarity Ratio:", similarity_ratio)
+        print("  Rhyme Bonus:", rhyme_bonus, ", Syllable Bonus:", syllable_bonus)
+        print("  => Damage:", damage, "\n")
+
+    # Find the total sum of damage
+    total_damage = sum(damage_results)
+    print("Total Damage Dealt:", total_damage)

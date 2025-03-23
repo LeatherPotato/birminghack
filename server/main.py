@@ -3,6 +3,7 @@ from websockets.asyncio.server import serve
 from websockets.exceptions import ConnectionClosed
 import json
 import random
+from calculate_damage import calc_damage
 
 
 active_games = {}
@@ -12,6 +13,9 @@ class Game:
     def __init__(self, p1_socket, p1_attributes):
         self.p1_socket = p1_socket
         self.p1_attributes = p1_attributes
+        self.p1_rap = []
+        self.p2_rap = []
+        self.raps_submitted=0
 
     def register_player_2(self, p2_socket, p2_attributes):
         self.p2_socket = p2_socket
@@ -34,6 +38,24 @@ async def join_lobby(websocket, data):
     await active_games[str(code)].p1_socket.send({"opponent_attributes": active_games[str(code)].p1_attributes})
 
 
+async def submit_rap(websocket, data):
+    code = data["code"]
+    player = int(data["player"])
+    if player==1:
+        damage = calc_damage(data["rap"], active_games[str(code)].p2_attributes["strength"], active_games[str(code)].p2_attributes["weakness"], active_games[str(code)].p2_attributes["defence"], active_games[str(code)].p1_attributes["lethality"])
+        active_games[str(code)].p2_attributes["health"] -= damage
+    elif player==2:
+        damage = calc_damage(data["rap"], active_games[str(code)].p1_attributes["strength"], active_games[str(code)].p1_attributes["weakness"], active_games[str(code)].p1_attributes["defence"], active_games[str(code)].p2_attributes["lethality"])
+        active_games[str(code)].p1_attributes["health"] -= damage
+         
+
+    active_games[str(code)].raps_submitted+=1
+
+    if active_games[str(code)].raps_submitted%2==0:
+        await active_games[str(code)].p1_socket.send({"opponent_rap": active_games[str(code)].p2_rap, "damage_dealt": damage, "damage_taken": damage})
+        await active_games[str(code)].p2_socket.send({"opponent_attributes": active_games[str(code)].p1_attributes, "damage": damage})
+
+
 async def handler(websocket):
     while True:
         try:
@@ -42,9 +64,14 @@ async def handler(websocket):
             match data["request_type"]:
                 case "CREATE_LOBBY":
                     await create_lobby(websocket, data["data"])
+                    break
 
                 case "JOIN_LOBBY":
                     await join_lobby(websocket, data["data"])
+                    break
+
+                case "SUBMIT_RAP":
+                    await submit_rap(websocket, data["data"])
 
         except ConnectionClosed:
             break
