@@ -18,8 +18,8 @@ class Network:
     def create_lobby(self, playerInfo):
         response = self._request_sender(self, "CREATE_LOBBY", playerInfo)
         return response["code"]
+    
 
- 
     def join_lobby(self, playerInfo, code):
         response = self._request_sender(self, "JOIN_LOBBY", {"code": code, "player_info": playerInfo})
         
@@ -27,9 +27,9 @@ class Network:
             return -1
         else:
             return response["opponent_info"]
-
-    def _opponent_joined_lobby():
         
-
-
-net = Network()
+    
+    def submit_rap(self, code, player, rap):
+        response = self._request_sender(self, "SUBMIT_RAP", {"code": code, "player": player, "rap": rap})
+        return response
+     

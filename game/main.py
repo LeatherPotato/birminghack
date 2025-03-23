@@ -1,3 +1,10 @@
+from websockets.sync.client import connect
+from network import Network
+import websockets
+import asyncio
+import json
+
+
 import pygame,random
 
 pygame.init() 
@@ -181,8 +188,12 @@ def createPlayer(name,offset,host,multi):
 def randomTip(loadTips):
     return loadTips[random.randint(0,len(loadTips)-1)]
 
-def endRound(fullRap,base_font,host):
-    enemyRap = ['I','Heart','big','balls']
+def endRound(fullRap,base_font,host,nw):
+    p=0
+    if host==True:
+        p=1
+    data = nw.submit_rap(fullRap,p,fullRap)
+    enemyRap = data['opponent_rap']
     if host:
         raps = fullRap
         rap2 = enemyRap
@@ -193,8 +204,8 @@ def endRound(fullRap,base_font,host):
     #recieve rap
     #send damange
     #recieve damage
-    damageRecieved = 50
-    damageDone = 30
+    damageRecieved = data['your_damage']
+    damageDone = data['opponent_damage']
     #player1.damage(damageRecieved)
     #player2.damage(damageDone)
     rapLines = []
@@ -226,6 +237,7 @@ def gameLoop(nw):
     selectTxt = Button(140,32,(255,255,255),'SELECT YOUR FIGHTER!',base_font)
     #state 3
     loadTxt = Button(140,32,(255,255,255),randomTip(loadTips),base_font)
+    codeTxt = Button(140,32,(255,255,255),'',base_font)
     #state 4
     rapInput1 = Button(140,32,colour_passive,'',base_font)
     rapInput2 = Button(140,32,colour_passive,'',base_font)
@@ -273,12 +285,36 @@ def gameLoop(nw):
 
                 if char1.clicked(event,screen):
                     player1,p1Img = createPlayer(char1.name,(100,-300),host,[1,1.5,0.5])
+                    if host==True:
+                        thing = player1.__dict__()
+                        thing['player'] = 1
+                        codeTxt.setText(nw.create_lobby(thing))
+                    else:
+                        thing = player1.__dict__()
+                        thing['player'] = 2
+                        nw.join_lobby(thing,gameIDInput.text)
                     state += 1
                 elif char2.clicked(event,screen):
                     player1,p1Img = createPlayer(char2.name,(100,-300),host,[1,1.5,0.5])
+                    if host==True:
+                        thing = player1.__dict__()
+                        thing['player'] = 1
+                        codeTxt.setText(nw.create_lobby(thing))
+                    else:
+                        thing = player1.__dict__()
+                        thing['player'] = 2
+                        nw.join_lobby(thing,gameIDInput.text)
                     state += 1
                 elif char3.clicked(event,screen):
                     player1,p1Img = createPlayer(char3.name,(100,-300),host,[1,1.5,0.5])
+                    if host==True:
+                        thing = player1.__dict__()
+                        thing['player'] = 1
+                        codeTxt.setText(nw.create_lobby(thing))
+                    else:
+                        thing = player1.__dict__()
+                        thing['player'] = 2
+                        nw.join_lobby(thing,gameIDInput.text)
                     state += 1
                 
 
@@ -298,13 +334,15 @@ def gameLoop(nw):
 
             screen.fill((0,0,0))
 
-            if pygame.time.get_ticks() - loadTxt.lastClicked > 5000:
+            if not message_queue.empty():
+                message = json.load(asyncio.wait_for(message_queue.get(), timeout=0.1))
                 loadTxt.lastClicked = pygame.time.get_ticks()
                 loadTxt.setText(randomTip(loadTips))
                 state += 1 #this is load area wait for players.
-                player2,p2Img = createPlayer('Sensor',(-100,300),host,[1,0.5,1.5])
+                player2,p2Img = createPlayer(message["opponent_attributes"]["name"],(-100,300),host,[1,0.5,1.5])
 
             loadTxt.draw(screen,(0,0))
+            codeTxt.draw(screen,(100,0))
         elif state == 4:
             for event in pygame.event.get():
 
@@ -335,7 +373,7 @@ def gameLoop(nw):
                     timerTxt.setText('181')
                     subState = False
                     fullRap = [rapInput1.text,rapInput2.text,rapInput3.text,rapInput4.text]
-                    rapTxts, rapNew, damageRecieved, damageDone = endRound(fullRap, base_font, host)
+                    rapTxts, rapNew, damageRecieved, damageDone = endRound(fullRap, base_font, host,nw)
                     p1Img.setImageSize()
                     p2Img.setImageSize()
                 timerTxt.setText(str(int(timerTxt.text) - 1))
@@ -383,12 +421,18 @@ def gameLoop(nw):
         pygame.display.flip()
 
 
-
-from websockets.sync.client import connect
-from network import Network
+async def receive_messages(websocket, message_queue):
+    try:
+        while True:
+            message = await websocket.recv()
+            await message_queue.put(message)
+    except websockets.exceptions.ConnectionClosed:
+        print("Connection closed.")
 
 
 uri = "ws://localhost:8765"
 with connect(uri) as websocket:
     nw = Network(websocket)
+    message_queue=asyncio.Queue()
+    asyncio.create_task(receive_messages(websocket, message_queue))
     gameLoop(nw)

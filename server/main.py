@@ -15,6 +15,8 @@ class Game:
         self.p1_attributes = p1_attributes
         self.p1_rap = []
         self.p2_rap = []
+        self.p1_damage = 0
+        self.p2_damage = 0
         self.raps_submitted=0
 
     def register_player_2(self, p2_socket, p2_attributes):
@@ -35,7 +37,7 @@ async def join_lobby(websocket, data):
     attributes = data["attributes"]
     active_games[str(code)].register_player_2(websocket, attributes)
     await websocket.send({"opponent_attributes": active_games[str(code)].p1_attributes})
-    await active_games[str(code)].p1_socket.send({"opponent_attributes": active_games[str(code)].p1_attributes})
+    await active_games[str(code)].p1_socket.send({"opponent_attributes": active_games[str(code)].p2_attributes})
 
 
 async def submit_rap(websocket, data):
@@ -52,8 +54,8 @@ async def submit_rap(websocket, data):
     active_games[str(code)].raps_submitted+=1
 
     if active_games[str(code)].raps_submitted%2==0:
-        await active_games[str(code)].p1_socket.send({"opponent_rap": active_games[str(code)].p2_rap, "player_attributes": active_games[str(code)].p1_attributes, "opponent_attributes": active_games[str(code)].p2_attributes, "damage": damage})
-        await active_games[str(code)].p2_socket.send({"opponent_rap": active_games[str(code)].p1_rap, "player_attributes": active_games[str(code)].p2_attributes, "opponent_attributes": active_games[str(code)].p1_attributes, "damage": damage})
+        await active_games[str(code)].p1_socket.send({"opponent_rap": active_games[str(code)].p2_rap, "opponent_damage": active_games[str(code)].p2_damage, "your_damage": active_games[str(code)].p1_damage})
+        await active_games[str(code)].p2_socket.send({"opponent_rap": active_games[str(code)].p1_rap, "opponent_damage": active_games[str(code)].p1_damage, "your_damage": active_games[str(code)].p2_damage})
 
 
 async def handler(websocket):
