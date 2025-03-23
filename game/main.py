@@ -430,7 +430,7 @@ async def receive_messages(websocket, message_queue):
         print("Connection closed.")
 
 
-uri = "ws://localhost:8765"
+uri = "ws://172.22.236.99:8765"
 with connect(uri) as websocket:
     nw = Network(websocket)
     message_queue=asyncio.Queue()
