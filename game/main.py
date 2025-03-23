@@ -11,7 +11,7 @@ pygame.init()
 menuMusic = 'Loading_Screen.wav'
 pygame.mixer.init()
 pygame.mixer.music.load(menuMusic)
-pygame.mixer.music.play()
+pygame.mixer.music.play(-1)
 
 clock = pygame.time.Clock()
 
