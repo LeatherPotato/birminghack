@@ -430,14 +430,6 @@ async def receive_messages(websocket, message_queue):
         print("Connection closed.")
 
 
-<<<<<<< HEAD
-uri = "ws://172.22.236.99:8765"
-with connect(uri) as websocket:
-    nw = Network(websocket)
-    message_queue=asyncio.Queue()
-    asyncio.create_task(receive_messages(websocket, message_queue))
-    gameLoop(nw)
-=======
 
 async def main():
     uri = "ws://172.22.236.99:8765"
@@ -448,4 +440,3 @@ async def main():
         gameLoop(nw)
 
 asyncio.run(main())
->>>>>>> ad34c93 (yoooo)
