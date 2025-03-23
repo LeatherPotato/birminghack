@@ -32,3 +32,8 @@ class Network:
             return response["data"]["opponent_info"]
 
     def _opponent_joined_lobby():
+        ...
+
+net = Network()
+
+
